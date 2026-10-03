@@ -1,0 +1,140 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Sky Stack</title><style>html,body{margin:0;height:100%;overflow:hidden;background:#111;touch-action:none;user-select:none}canvas{display:block;width:100vw;height:100vh}</style></head><body><canvas id="c"></canvas><script>// ---------- Ad network shell (MRAID 2/3, Meta, Google ExitApi, plain browser) ----------
+// Replace these with the advertised app's store links before shipping.
+const STORE = { ios: "https://apps.apple.com/app/id000000000", android: "https://play.google.com/store/apps/details?id=com.example.game" };
+
+// Pick the right store for this device
+function storeUrl() { return /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent) ? STORE.ios : STORE.android; }
+
+// Send the player to the store using whatever the ad network provides
+function cta() {
+  try {
+    if (window.FbPlayableAd) { FbPlayableAd.onCTAClick(); return; }
+    if (window.ExitApi) { ExitApi.exit(); return; }
+    if (window.mraid) { mraid.open(storeUrl()); return; }
+  } catch (e) {}
+  window.open(storeUrl(), "_blank");
+}
+
+// Start the game only once the ad container is ready and visible
+function whenReady(start) {
+  let started = false;
+  const go = () => { if (!started) { started = true; start(); } };
+  if (!window.mraid) { go(); return; }
+  const viewable = () => { if (mraid.isViewable()) go(); else mraid.addEventListener("viewableChange", v => { if (v) go(); }); };
+  if (mraid.getState() === "loading") mraid.addEventListener("ready", viewable); else viewable();
+}
+
+// Tell analytics-aware networks the player finished (optional hooks)
+function adComplete() {
+  try { if (window.dapi && dapi.gameEnded) dapi.gameEnded(); } catch (e) {}
+}
+
+// ---------- Sky Stack playable: tap to drop slabs, overhang slices off, end card ----------
+const BH = 1, MAX_DROPS = 10;
+const cv = document.getElementById("c"), cx = cv.getContext("2d");
+let W, H, U, stack, cur, debris = [], t = 0, state = "play", combo = 0, score = 0, camY = 0, msg = "", msgT = 0, hint = true;
+
+// Keep the canvas sharp and sized to the ad slot
+function resize() { const d = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); U = Math.min(W, H * 0.8) / 11; }
+
+// Colour of layer n: a hue that drifts up the tower
+function hue(n) { return `hsl(${(200 + n * 9) % 360},70%,60%)`; }
+
+// Fresh tower with a base slab and the first moving slab
+function reset() { stack = [{ x: 0, z: 0, w: 4, d: 4, n: 0 }]; spawn(); }
+
+// Start a new slab sliding along x or z
+function spawn() { const top = stack[stack.length - 1], axis = stack.length % 2 ? "x" : "z"; cur = { x: top.x, z: top.z, w: top.w, d: top.d, n: stack.length, axis, p: -6, dir: 1, speed: 5 + stack.length * 0.35 }; cur[axis] = top[axis] - 6; }
+
+// Drop the moving slab: slice the overhang, maybe end the run
+function drop() {
+  hint = false; const top = stack[stack.length - 1], a = cur.axis, size = a === "x" ? "w" : "d";
+  const delta = cur[a] - top[a], over = Math.abs(delta);
+  if (over >= top[size]) { debris.push({ ...cur, vy: 0 }); end("Missed!"); return; }
+  if (over < 0.15) { cur[a] = top[a]; combo++; msg = combo > 1 ? "PERFECT x" + combo : "PERFECT!"; msgT = 0.8; }
+  else { combo = 0; const keep = top[size] - over, cut = { ...cur };
+    cut[size] = over; cut[a] = delta > 0 ? cur[a] + keep : cur[a]; cut.vy = 0; debris.push(cut);
+    cur[size] = keep; if (delta < 0) cur[a] = top[a]; }
+  stack.push({ x: cur.x, z: cur.z, w: cur.w, d: cur.d, n: cur.n }); score++;
+  if (score >= MAX_DROPS) { end("Amazing tower!"); return; }
+  spawn();
+}
+
+// Show the end card
+function end(m) { state = "end"; msg = m; adComplete(); }
+
+// Handle any tap
+function tap() { if (state === "end") { cta(); return; } drop(); }
+
+// Advance the slider, falling pieces and camera
+function step(dt) {
+  t += dt; msgT -= dt;
+  if (state === "play") { const a = cur.axis, top = stack[stack.length - 1]; cur[a] += cur.dir * cur.speed * dt; if (cur[a] > top[a] + 6) cur.dir = -1; if (cur[a] < top[a] - 6) cur.dir = 1; }
+  debris.forEach(p => { p.vy += 30 * dt; p.yOff = (p.yOff || 0) + p.vy * dt; }); debris = debris.filter(p => p.yOff < 40);
+  camY += (Math.max(0, stack.length - 4) * BH - camY) * Math.min(1, dt * 4);
+}
+
+// Project a 3D point to the screen (isometric)
+function P(x, y, z) { return [W / 2 + (x - z) * U * 0.87, H * 0.68 + (x + z) * U * 0.5 - (y - camY) * U]; }
+
+// Draw one slab as three shaded faces
+function slab(b, y, col) {
+  const { x, z, w, d } = b, top = [P(x, y + BH, z), P(x + w, y + BH, z), P(x + w, y + BH, z + d), P(x, y + BH, z + d)];
+  const face = (pts, c) => { cx.fillStyle = c; cx.beginPath(); pts.forEach((p, i) => i ? cx.lineTo(p[0], p[1]) : cx.moveTo(p[0], p[1])); cx.closePath(); cx.fill(); };
+  face([P(x + w, y, z), P(x + w, y, z + d), P(x + w, y + BH, z + d), P(x + w, y + BH, z)], shade(col, -18));
+  face([P(x, y, z + d), P(x + w, y, z + d), P(x + w, y + BH, z + d), P(x, y + BH, z + d)], shade(col, -32));
+  face(top, col);
+}
+
+// Darken an hsl colour string by changing its lightness
+function shade(c, k) { return c.replace(/(\d+)%\)$/, (m, l) => Math.max(0, +l + k) + "%)"); }
+
+// Centered text helper
+function text(s, x, y, size, col, weight) { cx.font = `${weight || 800} ${size}px system-ui,Segoe UI,sans-serif`; cx.textAlign = "center"; cx.textBaseline = "middle"; cx.fillStyle = col; cx.fillText(s, x, y); }
+
+// Rounded rectangle path
+function rr(x, y, w, h, r) { cx.beginPath(); cx.moveTo(x + r, y); cx.arcTo(x + w, y, x + w, y + h, r); cx.arcTo(x + w, y + h, x, y + h, r); cx.arcTo(x, y + h, x, y, r); cx.arcTo(x, y, x + w, y, r); cx.closePath(); }
+
+// Small install button that is always visible
+function installRect() { const s = Math.min(W, H) / 400, w = 120 * s, h = 40 * s; return { x: W - w - 12 * s, y: 12 * s, w, h, s }; }
+
+// Draw the whole frame
+function draw() {
+  const g = cx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, `hsl(${(210 + score * 6) % 360},60%,22%)`); g.addColorStop(1, "#0e1328"); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  const s = Math.min(W, H) / 400;
+  if (state === "play") text(String(score), W / 2, H * 0.12, 64 * s, "#fff", 900);
+  stack.forEach((b, i) => slab(b, i * BH, hue(b.n)));
+  if (state === "play") slab(cur, stack.length * BH, hue(cur.n));
+  debris.forEach(p => slab(p, p.n * BH - p.yOff, hue(p.n)));
+  if (msgT > 0 && state === "play") text(msg, W / 2, H * 0.22, 28 * s, "#ffe14d", 900);
+  if (hint && state === "play") { text("👆", W / 2, H * 0.84 + Math.sin(t * 8) * 8 * s, 56 * s, "#000"); text("Tap to drop the block", W / 2, H * 0.93, 20 * s, "#fff", 700); }
+  const ib = installRect(); cx.fillStyle = "#5ad17a"; rr(ib.x, ib.y, ib.w, ib.h, ib.h / 2); cx.fill(); text("INSTALL", ib.x + ib.w / 2, ib.y + ib.h / 2, 16 * s, "#fff");
+  if (state === "end") drawEnd(s);
+}
+
+// End card with big call to action
+function drawEnd(s) {
+  cx.fillStyle = "rgba(10,14,40,.8)"; cx.fillRect(0, 0, W, H);
+  text("SKY STACK", W / 2, H * 0.18, 44 * s, "#ffe14d", 900);
+  text(msg, W / 2, H * 0.3, 36 * s, "#fff", 900);
+  text(`You stacked ${score} blocks.`, W / 2, H * 0.3 + 44 * s, 20 * s, "#c9cfe6", 700);
+  text("Can you reach 100?", W / 2, H * 0.3 + 72 * s, 20 * s, "#c9cfe6", 700);
+  const bw = 260 * s, bh = 70 * s, by = H * 0.55, p = 1 + Math.sin(t * 6) * 0.04;
+  cx.save(); cx.translate(W / 2, by + bh / 2); cx.scale(p, p); cx.fillStyle = "#5ad17a"; rr(-bw / 2, -bh / 2, bw, bh, bh / 2); cx.fill(); text("PLAY NOW", 0, 0, 30 * s, "#fff", 900); cx.restore();
+}
+
+// Main loop
+let last = 0;
+function frame(ts) { const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts; step(dt); draw(); requestAnimationFrame(frame); }
+
+// Boot once the ad container says go
+whenReady(() => {
+  resize(); addEventListener("resize", resize); reset();
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault(); const ib = installRect();
+    if (e.clientX > ib.x && e.clientX < ib.x + ib.w && e.clientY > ib.y && e.clientY < ib.y + ib.h) { cta(); return; }
+    tap();
+  });
+  requestAnimationFrame(frame);
+});
+</script></body></html>

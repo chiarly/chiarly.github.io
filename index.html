@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chiarly — HTML5 games & playable ads</title>
+<meta name="description" content="Chiarly is a small HTML5 game studio: web games for game portals and playable ads for mobile game marketing.">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0e1230;--panel:#161b45;--line:#262d66;--ink:#eef1ff;--mute:#a9b1dc;--acc:#ffe14d;--acc2:#7eecf0;--go:#5ad17a}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif}
+a{color:var(--acc2)}h1,h2,h3{font-family:Poppins,sans-serif;line-height:1.15;margin:0 0 .5em}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;z-index:5;background:rgba(14,18,48,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:14px;height:64px}
+header img{width:38px;height:38px;border-radius:50%}
+header b{font-family:Poppins;font-size:20px;letter-spacing:.5px}
+nav{margin-left:auto;display:flex;gap:18px}nav a{color:var(--mute);text-decoration:none;font-weight:500}nav a:hover{color:var(--ink)}
+.hero{padding:80px 0 60px;background:radial-gradient(600px 300px at 75% 30%,rgba(126,236,240,.18),transparent)}
+.hero h1{font-size:clamp(34px,6vw,58px);max-width:800px}.hero h1 span{color:var(--acc)}
+.hero p{color:var(--mute);font-size:19px;max-width:640px}
+.btn{display:inline-block;padding:13px 22px;border-radius:999px;font-weight:600;text-decoration:none;margin:8px 10px 0 0}
+.btn.go{background:var(--go);color:#0b2a14}.btn.ghost{border:1px solid var(--line);color:var(--ink)}
+section{padding:56px 0;border-top:1px solid var(--line)}
+.lead{color:var(--mute);max-width:700px;margin-bottom:28px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.card img{width:100%;aspect-ratio:630/500;object-fit:cover;display:block}
+.card .b{padding:14px 16px 18px;flex:1;display:flex;flex-direction:column}
+.card h3{font-size:18px}.card p{color:var(--mute);font-size:14px;margin:0 0 12px;flex:1}
+.tag{font-size:12px;color:var(--acc);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.ads{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.ad{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;gap:18px;align-items:center}
+.phone{flex:0 0 auto;width:180px;height:320px;border:8px solid #05071a;border-radius:26px;overflow:hidden;background:#000;position:relative}
+.phone iframe{width:360px;height:640px;border:0;transform:scale(.4555);transform-origin:0 0;position:absolute;top:0;left:0}
+.ad p{color:var(--mute);font-size:14px}
+.svc{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.svc div{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px}
+.svc ul{padding-left:18px;color:var(--mute);font-size:14px;margin:8px 0 0}
+.price{font-family:Poppins;font-size:15px;color:var(--acc)}
+footer{padding:40px 0;color:var(--mute);font-size:14px;border-top:1px solid var(--line)}
+@media(max-width:640px){nav{display:none}.ad{flex-direction:column}.hero{padding:56px 0 40px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><img src="logo.png" alt=""><b>CHIARLY</b>
+<nav><a href="#ads">Playable ads</a><a href="#games">Games</a><a href="#services">Services</a><a href="#contact">Contact</a></nav></div></header>
+
+<div class="hero"><div class="wrap">
+<h1>Small, fast <span>HTML5 games</span> and playable ads that run anywhere.</h1>
+<p>Chiarly is a small game studio. Our web games run on GameDistribution, GameMonetize and itch.io, and our playable ads run inside AppLovin, Unity, Mintegral, Google and Meta. Each one is a single light HTML file.</p>
+<a class="btn go" href="#ads">Try the playable ads</a><a class="btn ghost" href="#games">Play our games</a>
+</div></div>
+
+<section id="ads"><div class="wrap">
+<h2>Playable ads</h2>
+<p class="lead">Tap inside the phones. Each ad is one self-contained HTML file of about 8 KB. It waits for the ad container (MRAID), shows a tutorial hand, about 20 seconds of real gameplay, then an end card whose button opens the store.</p>
+<div class="ads">
+ <div class="ad"><div class="phone"><iframe src="color-sort-playable.html" title="Color Sort playable ad" loading="lazy"></iframe></div>
+  <div><span class="tag">Puzzle</span><h3>Color Sort</h3><p>Two short levels: an easy win, then a timed harder one. It ends on "So close!" or "You're a natural!" with a Play Now button.</p><a href="color-sort-playable.html" target="_blank">Open full screen</a></div></div>
+ <div class="ad"><div class="phone"><iframe src="sky-stack-playable.html" title="Sky Stack playable ad" loading="lazy"></iframe></div>
+  <div><span class="tag">Hyper-casual</span><h3>Sky Stack</h3><p>A one-tap stacker with perfect-drop combos. It ends after 10 blocks or a miss, then shows the store button.</p><a href="sky-stack-playable.html" target="_blank">Open full screen</a></div></div>
+</div></div></section>
+
+<section id="games"><div class="wrap">
+<h2>Our games</h2>
+<p class="lead">Free to play in your browser, on desktop and mobile.</p>
+<div class="grid">
+ <div class="card"><img src="glimmer-slime.jpg" alt="Glimmer Slime"><div class="b"><span class="tag">Survivors-like</span><h3>Glimmer Slime</h3><p>A slime made of light. Bounce your shots off mirrors, reflect monster fire, beat 3 bosses, then go Endless.</p><a href="https://chiarly6.itch.io/glimmer-slime">Play</a></div></div>
+ <div class="card"><img src="trap-step.jpg" alt="Trap Step"><div class="b"><span class="tag">Troll platformer</span><h3>Trap Step: Trust Nothing</h3><p>50 levels of lies: fake floors, invisible bridges and gravity that flips.</p><a href="https://chiarly6.itch.io/trap-step">Play</a></div></div>
+ <div class="card"><img src="putt-party.jpg" alt="Putt Party"><div class="b"><span class="tag">Sports</span><h3>Putt Party</h3><p>27 holes of mini golf across three courses, with portals, ice and bumpers.</p><a href="https://chiarly6.itch.io/putt-party">Play</a></div></div>
+ <div class="card"><img src="color-sort.jpg" alt="Color Sort"><div class="b"><span class="tag">Puzzle</span><h3>Color Sort</h3><p>Endless ball-sort levels, each checked by a solver so none are impossible.</p><a href="https://chiarly6.itch.io/color-sort">Play</a></div></div>
+ <div class="card"><img src="neon-dash.jpg" alt="Neon Dash"><div class="b"><span class="tag">Runner</span><h3>Neon Dash</h3><p>A synthwave 3-lane runner with jumps, rolls and coin magnets.</p><a href="https://chiarly6.itch.io/neon-dash">Play</a></div></div>
+ <div class="card"><img src="sky-stack.jpg" alt="Sky Stack"><div class="b"><span class="tag">One tap</span><h3>Sky Stack</h3><p>Drop sliding slabs and chain perfect drops to grow the tower back.</p><a href="https://chiarly6.itch.io/sky-stack">Play</a></div></div>
+ <div class="card"><img src="star-forge.jpg" alt="Star Forge"><div class="b"><span class="tag">Idle</span><h3>Star Forge</h3><p>Forge energy from a living star, build generators and go Supernova.</p><a href="https://chiarly6.itch.io/star-forge">Play</a></div></div>
+ <div class="card"><img src="swarm-survivor.jpg" alt="Swarm Survivor"><div class="b"><span class="tag">Arena</span><h3>Swarm Survivor Arena</h3><p>The prototype that grew into Glimmer Slime: move, dodge, upgrade.</p><a href="https://chiarly6.itch.io/swarm-survivor-arena">Play</a></div></div>
+</div></div></section>
+
+<section id="services"><div class="wrap">
+<h2>Work with us</h2>
+<div class="svc">
+ <div><span class="price">from $149</span><h3>Playable ads</h3>We rebuild your game's core mechanic as a 15–30 second playable.<ul><li>One HTML file per network, under 5 MB</li><li>AppLovin, Unity, Mintegral, Google, Meta</li><li>Tutorial, end card, video and GIF for review</li></ul></div>
+ <div><span class="price">quote</span><h3>HTML5 game services</h3>We integrate ad SDKs and port or fix web games.<ul><li>CrazyGames, GameDistribution, GameMonetize, Poki SDKs</li><li>Pause and mute during ads, rewarded ads</li><li>Mobile and touch fixes</li></ul></div>
+ <div><span class="price">from $399</span><h3>Small business websites</h3>We build clean, fast sites that work on phones.<ul><li>1–3 pages, ready in about 5 days</li><li>You see a live preview before you pay in full</li><li>Optional monthly care plan</li></ul></div>
+</div></div></section>
+
+<footer id="contact"><div class="wrap">
+<b style="color:var(--ink)">Contact</b><br>
+Order or message us on <a href="https://www.fiverr.com/chiarly">Fiverr</a>, or email <a href="mailto:chiarly741@gmail.com">chiarly741@gmail.com</a>.<br>
+Games on <a href="https://chiarly6.itch.io">itch.io</a>. © 2026 Chiarly.
+</div></footer>
+</body>
+</html>
